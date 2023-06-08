@@ -6,6 +6,7 @@
 import numpy as np
 from scipy.integrate import solve_ivp
 
+# Plotting
 import matplotlib.pyplot as plt
 import matplotlib
 import niceplots
@@ -36,21 +37,21 @@ def vdp_lin(t, u, e=0.1, B=2.):
 
 if __name__=="__main__":
     ### --- RUN VAN DER POL SIMULATION ---
-    e = 1.
-    B = 1.
+    e = 0.1
+    B = 2.
 
     vdp = lambda t, u : vdp_lin(t, u, e, B)
     # set simulation time
-    t0 = 0; tf = 50
+    t0 = 0; tf = 200
     nsteps = 1000
-    t = np.linspace(t0, tf, nsteps)
+    t = np.linspace(t0, tf, nsteps+1)
 
     # initializaion
     u0 = np.array([0., 0.])
 
     # solve IVP
     sol = solve_ivp(vdp, t_span=[t0,tf], y0=u0, t_eval=t, method="RK23")
-    # np.savetxt(f"data/vdp_e{e}_B{B}.csv", np.transpose(np.vstack((sol.t, sol.y))), delimiter=",")
+    np.savetxt(f"data/vdp_e{e}_B{B}.csv", np.transpose(np.vstack((sol.t, sol.y))), delimiter=",")
     
     x = sol.y[0,:]
     dxdt = sol.y[1,:]
@@ -75,7 +76,15 @@ if __name__=="__main__":
 
     plt.suptitle(r"$B$ = {}, $e$ = {}".format(B,e), fontsize=24)
 
-    plt.savefig("vdp.png", dpi=400)
+    plt.savefig("Figures/vdp.png", dpi=400)
+
+    fig, ax = plt.subplots(1, 1, figsize=(9,6))
+    start = 499
+    ax.plot(t[start:start+32+1], dxdt[start:start+32+1], "-bo")
+    ax.scatter(t[start+32+1], dxdt[start+32+1], color="red")
+    ax.set_xlabel(r"$t$")
+    ax.set_ylabel(r"$u_2$")
+    plt.savefig("Figures/time_delay.png", dpi=400)
 
 
 
