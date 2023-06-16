@@ -90,13 +90,14 @@ class Transformer(tf.keras.Model):
 if __name__=="__main__":
     ### --- DATA ---
     # import data
-    filename = "data/vdp_e0.1_B2.0.csv"
+    # filename = "data/vdp_e0.1_B2.0.csv"
+    filename = "data/square.csv"
     data = np.loadtxt(filename, delimiter=",")
 
     u = 1 # use x or dx/dt
 
     # split into training/validation series
-    split = 800 # where to split training and validation data
+    split = 100#800 # where to split training and validation data
     train_time, valid_time = data[:split,0], data[split:-8,0]
     train_data, valid_data = data[:split,u], data[split:-8,u]
 
@@ -123,34 +124,30 @@ if __name__=="__main__":
     for n in range(nstep):
         pred_data[n] = model.predict(current, verbose=0)[0][0]
         current = np.hstack((current[0,1:], pred_data[n])).reshape((1, time_delay))
-    np.savetxt(f"data/tf_e{filename[10:13]}_B{filename[15:18]}_pred_u{u}.csv", np.transpose(np.vstack((pred_time, pred_data))), delimiter=",")
+    # np.savetxt(f"data/tf_e{filename[10:13]}_B{filename[15:18]}_pred_u{u}.csv", np.transpose(np.vstack((pred_time, pred_data))), delimiter=",")
+    np.savetxt(f"data/tf_square_pred.csv", np.transpose(np.vstack((pred_time, pred_data))), delimiter=",")
 
-    # pred_time, pred_data = data[split:,0], data[split-time_delay:,2]
     x_pred, _ = delay_time_series(data[split-time_delay:,u], time_delay)
     pred_tf = model.predict(x_pred)
-    np.savetxt(f"data/tf_e{filename[10:13]}_B{filename[15:18]}_recon_u{u}.csv", np.transpose(np.vstack((pred_time, pred_tf.reshape((1,nstep))))), delimiter=",")
-
-
-    # pred_time, pred_data = data[split:,0], data[split-time_delay:,2]
-    # x_pred, _ = delay_time_series(data[split-time_delay:,2], time_delay)
-    # pred_lstm = model.predict(x_pred)
-    # np.savetxt(f"data/tf_e{filename[10:13]}_B{filename[15:18]}.csv", np.transpose(np.vstack((pred_time, pred_lstm[:,0]))), delimiter=",")
+    # np.savetxt(f"data/tf_e{filename[10:13]}_B{filename[15:18]}_recon_u{u}.csv", np.transpose(np.vstack((pred_time, pred_tf.reshape((1,nstep))))), delimiter=",")
+    np.savetxt(f"data/tf_square_recon.csv", np.transpose(np.vstack((pred_time, pred_tf.reshape((1,nstep))))), delimiter=",")
 
     fig, ax = plt.subplots(2,1,figsize=(15,10))
     ax[0].plot(train_time, train_data,"-b")
     ax[0].set_xlabel(r"t")
-    ax[0].set_ylabel(r"$u_2$")
+    # ax[0].set_ylabel(r"$u_2$")
     ax[0].set_title(r"Training Data")
 
     ax[1].plot(valid_time, valid_data, "-b", label="Data")
     ax[1].plot(pred_time, pred_data, "--r", label="Prediction")
     ax[1].plot(pred_time, pred_tf, "--g", label="Reconstruction")
     ax[1].set_xlabel(r"t")
-    ax[1].set_ylabel(r"$u_2$")
+    # ax[1].set_ylabel(r"$u_2$")
     ax[1].set_title(r"Validation Data")
-    ax[1].legend()
+    ax[1].legend(frameon=True)
 
-    plt.savefig(f"Figures/transformer_u{u}.png", dpi=400)
+    # plt.savefig(f"Figures/transformer_u{u}.png", dpi=400)
+    plt.savefig("Figures/tf_square.png", dpi=400)
 
     # plot training/validation loss
     fig, ax = plt.subplots(1,1,figsize=(10,6))
@@ -161,7 +158,8 @@ if __name__=="__main__":
     ax.set_title(r"Transformer")
     ax.legend()
 
-    plt.savefig(f"Figures/tf_loss_u{u}.png", dpi=400)
+    # plt.savefig(f"Figures/tf_loss_u{u}.png", dpi=400)
+    plt.savefig(f"Figures/tf_square_loss.png", dpi=400)
     
 
 
